@@ -37,8 +37,8 @@ class DB:
         self._session.add(user)
         self._session.commit()
         return user
-    
-    def find_user_by(self, **args: dict)-> User:
+
+    def find_user_by(self, **args: dict) -> User:
         """
         Find User by his attributes
         """
