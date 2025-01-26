@@ -38,7 +38,10 @@ class DB:
         self._session.commit()
         return user
     
-    def find_user_by(self, **args):
+    def find_user_by(self, **args: dict)-> User:
+        """
+        Find User by his attributes
+        """
         try:
             user = self.__session.query(User).filter_by(**args).first()
         except Exception:
