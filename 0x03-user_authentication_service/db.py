@@ -5,9 +5,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
-from user import Base, User
-from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import InvalidRequestError
+from user import Base, User
+from typing import TypeVar
 
 
 class DB:
@@ -31,21 +32,43 @@ class DB:
             self.__session = DBSession()
         return self.__session
 
-    def add_user(self, email: str, hashed_password: str) -> User:
-        "Add a user to the database"
-        user = User(email=email, hashed_password=hashed_password)
+    def add_user(
+            self,
+            email: str,
+            hashed_password: str) -> User:
+        """
+        adds a new user
+        """
+        user = User(email=email,
+                    hashed_password=hashed_password)
         self._session.add(user)
         self._session.commit()
         return user
 
     def find_user_by(self, **args: dict) -> User:
         """
-        Find User by his attributes
+        Find user by his attributes
         """
         try:
-            user = self.__session.query(User).filter_by(**args).first()
+            user = self._session.query(User).filter_by(**args).first()
         except Exception:
             raise InvalidRequestError
         if user is None:
             raise NoResultFound
         return user
+
+    def update_user(self,
+                    user_id: int,
+                    **args: dict) -> None:
+        """
+        update a targeted user
+        """
+        targeted_user = self.find_user_by(**{"id": user_id})
+        for key, val in args.items():
+            if hasattr(targeted_user, key):
+                if val is None or\
+                        type(getattr(targeted_user, key)) is type(val):
+                    setattr(targeted_user, key, val)
+                    continue
+            raise ValueError
+        self._session.commit()
